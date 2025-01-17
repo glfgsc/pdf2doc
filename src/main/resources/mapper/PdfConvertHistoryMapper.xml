@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.cat.coin.coincatmanager.mapper.PdfConvertHistoryMapper">
+    <!--    <resultMap type="com.elephant.elephant_bi.domain.pojo.DataOrigin" id="dataOriginMap">-->
+    <!--        <result property="connectionPool" column="connectionPool"  typeHandler="com.elephant.elephant_bi.framework.ObjectJsonHandler"/>-->
+    <!--    </resultMap>-->
+    <insert id="insert" parameterType="com.cat.coin.coincatmanager.domain.pojo.Pdf">
+        insert into pdf_convert_history (name,old_path,new_path,creator)
+        values(#{name},#{old_path},#{new_path},#{creator})
+    </insert>
+
+    <select id="selectAll" resultType="com.cat.coin.coincatmanager.domain.pojo.Pdf">
+        select *
+        from pdf_convert_history
+    </select>
+</mapper>
