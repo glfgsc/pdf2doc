@@ -1,13 +1,21 @@
 package com.cat.coin.coincatmanager.service;
 
 import com.cat.coin.coincatmanager.controller.vo.PdfConvertVo;
+import com.cat.coin.coincatmanager.controller.vo.PdfHistoryPageVo;
 import com.cat.coin.coincatmanager.domain.pojo.Pdf;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 
 public interface PdfConvertService {
-    void pdfConvert(PdfConvertVo pdfConvertVo) throws IOException;
+    Pdf pdfConvert(PdfConvertVo pdfConvertVo) throws Exception;
+    void pdfConvertSchedule(PdfConvertVo pdfConvertVo, Pdf pdf, InputStream inputStream) throws Exception;
+
     List<Pdf> getHistory();
+
+    void downloadOldFile(String id) throws IOException;
+    void downloadNewFile(String id) throws IOException;
+    void delete(String id);
+    List<Pdf> getHistoryByPage(PdfHistoryPageVo pdfHistoryPageVo);
+    void updateById(Pdf pdf);
 }

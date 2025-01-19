@@ -21,9 +21,18 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>e-iceblue</groupId>
-            <artifactId>spire.pdf.free</artifactId>
-            <version>5.1.0</version>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-pdf</artifactId>
+            <version>21.11</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/lib/aspose-pdf-21.11.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.aspose</groupId>
+            <artifactId>aspose-words</artifactId>
+            <version>20.12</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/src/main/resources/lib/aspose-words-20.12.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -69,6 +78,21 @@
             <artifactId>druid</artifactId>
             <version>1.1.10</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -94,13 +118,15 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
                     <mainClass>com.cat.coin.coincatmanager.CoinCatManagerApplication</mainClass>
-                    <skip>true</skip>
+                    <skip>false</skip>
+                    <includeSystemScope>true</includeSystemScope> <!-- 这里是关键 -->
                 </configuration>
                 <executions>
                     <execution>

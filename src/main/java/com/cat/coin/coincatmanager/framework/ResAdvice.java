@@ -1,8 +1,8 @@
 package com.cat.coin.coincatmanager.framework;
 
 
-import com.cat.coin.coincatmanager.domain.pojo.Page;
-import com.cat.coin.coincatmanager.utils.Resp;
+import com.cat.coin.coincatmanager.domain.pojo.AjaxResult;
+import com.cat.coin.coincatmanager.domain.pojo.PageResult;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -27,13 +27,17 @@ public class ResAdvice implements ResponseBodyAdvice<Object> {
                                   ServerHttpRequest request,
                                   ServerHttpResponse response) {
         if(body == null){
-            return Resp.success("");
+            return AjaxResult.success();
         }
-        if (body instanceof Resp<?> || !selectedContentType.equals(MediaType.APPLICATION_JSON)) {
+        if(body instanceof AjaxResult)
             return body;
-        }else if(body instanceof Page<?>){
-            return Resp.success(body);
+        else if(body instanceof PageResult<?>){
+            PageResult pageResult = (PageResult)body;
+            AjaxResult ajaxResult = AjaxResult.success(pageResult.getList());
+            ajaxResult.put("total", pageResult.getTotal());
+            return ajaxResult;
+        }else{
+            return AjaxResult.success(body);
         }
-        return Resp.success(body);
     }
 }

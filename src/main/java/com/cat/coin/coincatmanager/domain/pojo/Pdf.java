@@ -4,30 +4,51 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 public class Pdf implements Serializable {
-    private int id;
+    private String id;
     private String name;
-    private Timestamp createTime;
+    private String createTime;
+    private String updateTime;
     private String creator;
-    private String newPath;
-    private String oldPath;
+
+    public String getUpdateTime() {
+        return updateTime;
+    }
 
     @Override
     public String toString() {
         return "Pdf{" +
-                "id=" + id +
+                "id='" + id + '\'' +
                 ", name='" + name + '\'' +
                 ", createTime=" + createTime +
+                ", updateTime=" + updateTime +
                 ", creator='" + creator + '\'' +
                 ", newPath='" + newPath + '\'' +
                 ", oldPath='" + oldPath + '\'' +
+                ", status=" + status +
                 '}';
     }
 
-    public int getId() {
+    public void setUpdateTime(String updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    private String newPath;
+    private String oldPath;
+    private int status;
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -39,11 +60,11 @@ public class Pdf implements Serializable {
         this.name = name;
     }
 
-    public Timestamp getCreateTime() {
+    public String getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(Timestamp createTime) {
+    public void setCreateTime(String createTime) {
         this.createTime = createTime;
     }
 
