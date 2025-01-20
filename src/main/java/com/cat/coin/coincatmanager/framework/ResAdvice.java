@@ -4,7 +4,9 @@ package com.cat.coin.coincatmanager.framework;
 import com.cat.coin.coincatmanager.domain.pojo.AjaxResult;
 import com.cat.coin.coincatmanager.domain.pojo.PageResult;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -29,14 +31,16 @@ public class ResAdvice implements ResponseBodyAdvice<Object> {
         if(body == null){
             return AjaxResult.success();
         }
-        if(body instanceof AjaxResult)
+        if(body instanceof AjaxResult){
             return body;
-        else if(body instanceof PageResult<?>){
+        }else if(body instanceof PageResult<?>){
             PageResult pageResult = (PageResult)body;
             AjaxResult ajaxResult = AjaxResult.success(pageResult.getList());
             ajaxResult.put("total", pageResult.getTotal());
             return ajaxResult;
-        }else{
+        } else if (body instanceof Resource) {
+            return body;
+        } else{
             return AjaxResult.success(body);
         }
     }

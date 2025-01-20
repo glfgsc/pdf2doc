@@ -3,6 +3,7 @@ package com.cat.coin.coincatmanager.controller;
 import com.cat.coin.coincatmanager.controller.vo.PdfConvertVo;
 import com.cat.coin.coincatmanager.controller.vo.PdfHistoryPageVo;
 import com.cat.coin.coincatmanager.controller.vo.PdfHistoryVo;
+import com.cat.coin.coincatmanager.domain.pojo.AjaxResult;
 import com.cat.coin.coincatmanager.domain.pojo.PageResult;
 import com.cat.coin.coincatmanager.domain.pojo.Pdf;
 import com.cat.coin.coincatmanager.service.PdfConvertService;
@@ -10,6 +11,8 @@ import com.cat.coin.coincatmanager.utils.HttpContextUtils;
 import com.cat.coin.coincatmanager.utils.SpringContextUtils;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -50,13 +53,23 @@ public class PdfController {
     }
 
     @GetMapping("/downloadOldFile")
-    public void downloadOldFile(String id) throws IOException {
-        pdfConvertService.downloadOldFile(id);
+    public ResponseEntity<Resource> downloadOldFile(String id, HttpServletResponse response) throws IOException {
+        return pdfConvertService.downloadOldFile(id,response);
     }
 
     @GetMapping("/downloadNewFile")
-    public void downloadNewFile(String id) throws IOException {
-        pdfConvertService.downloadNewFile(id);
+    public ResponseEntity<Resource> downloadNewFile(String id,HttpServletResponse response) throws IOException {
+        return pdfConvertService.downloadNewFile(id,response);
+    }
+
+    @GetMapping("/downloadOldFileUrl")
+    public AjaxResult downloadOldFileUrl(String id){
+        return AjaxResult.success("http://8.130.116.117:8081/pdf/downloadOldFile?id=" + id);
+    }
+
+    @GetMapping("/downloadNewFileUrl")
+    public AjaxResult downloadNewFileUrl(String id){
+        return AjaxResult.success("http://8.130.116.117:8081/pdf/downloadNewFile?id=" + id);
     }
 
     @GetMapping("/delete")

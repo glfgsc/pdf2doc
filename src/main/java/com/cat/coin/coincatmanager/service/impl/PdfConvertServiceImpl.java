@@ -1,5 +1,6 @@
 package com.cat.coin.coincatmanager.service.impl;
 import com.aspose.pdf.License;
+import com.aspose.words.FontSettings;
 import com.cat.coin.coincatmanager.controller.vo.PdfConvertVo;
 import com.cat.coin.coincatmanager.controller.vo.PdfHistoryPageVo;
 import com.cat.coin.coincatmanager.domain.pojo.PageParam;
@@ -8,11 +9,20 @@ import com.cat.coin.coincatmanager.mapper.PdfConvertHistoryMapper;
 import com.cat.coin.coincatmanager.service.PdfConvertService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.core.io.ResourceLoader;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import java.io.*;
@@ -21,6 +31,9 @@ import org.apache.commons.io.FileUtils;
 
 @Service
 public class PdfConvertServiceImpl implements PdfConvertService {
+    @Autowired
+    private ResourceLoader resourceLoader;
+
     @Value("${file.path}")
     private String filePath;
 
@@ -29,9 +42,6 @@ public class PdfConvertServiceImpl implements PdfConvertService {
 
     @Autowired
     private PdfConvertHistoryMapper pdfConvertHistoryMapper;
-    @Autowired
-    private HttpServletResponse response;
-
 
     @Async
     @Override
@@ -70,6 +80,8 @@ public class PdfConvertServiceImpl implements PdfConvertService {
                 String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]   + ".docx";
                 FileOutputStream os = new FileOutputStream(newUrl);
                 com.aspose.pdf.Document doc = new com.aspose.pdf.Document(oldUrl+File.separator+dateName);//加载源文件数据
+                FontSettings font = new FontSettings();
+                font.setFontsFolder("/usr/share/fonts/chinese", true);
                 doc.save(os, com.aspose.pdf.SaveFormat.DocX);//设置转换文件类型并转换
                 pdf.setNewPath(newUrl);
                 pdf.setStatus(2);
@@ -81,6 +93,8 @@ public class PdfConvertServiceImpl implements PdfConvertService {
                 String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]   + ".pdf";
                 FileOutputStream os = new FileOutputStream(newUrl);
                 com.aspose.words.Document doc = new com.aspose.words.Document(oldUrl+File.separator+dateName);//加载源文件数据
+                FontSettings font = new FontSettings();
+                font.setFontsFolder("/usr/share/fonts/chinese", true);
                 doc.save(os, com.aspose.words.SaveFormat.PDF);//设置转换文件类型并转换
                 pdf.setNewPath(newUrl);
                 pdf.setStatus(2);
@@ -114,45 +128,31 @@ public class PdfConvertServiceImpl implements PdfConvertService {
     }
 
     @Override
-    public void downloadOldFile(String id) throws IOException {
+    public ResponseEntity<Resource> downloadOldFile(String id,HttpServletResponse response) throws IOException {
         Pdf pdf = pdfConvertHistoryMapper.selectById(id);
         File file = new File(pdf.getOldPath());
         //文件名编码，防止中文乱码
         String filename = URLEncoder.encode(pdf.getOldPath().split("/")[pdf.getOldPath().split("/").length-1], "UTF-8");
-        // 设置响应头信息
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-        // 内容类型为通用类型，表示二进制数据流
-        response.setContentType("application/octet-stream");
-        response.setCharacterEncoding("utf-8");
-
-        // 循环，边读取边输出，可避免大文件时OOM
-        try (InputStream inputStream = new FileInputStream(file); OutputStream os = response.getOutputStream()) {
-            byte[] bytes = new byte[1024];
-            int readLength;
-            while ((readLength = inputStream.read(bytes)) != -1) {
-                os.write(bytes, 0, readLength);
-            }
-        }
+        Resource resource = resourceLoader.getResource("file:" + file.getAbsolutePath());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
+        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache");
+        headers.add("Content-Type","application/octet-stream");
+        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 
     @Override
-    public void downloadNewFile(String id) throws IOException {
+    public ResponseEntity<Resource> downloadNewFile(String id, HttpServletResponse response) throws IOException {
         Pdf pdf = pdfConvertHistoryMapper.selectById(id);
         File file = new File(pdf.getNewPath());
         //文件名编码，防止中文乱码
-        String filename = URLEncoder.encode(file.getName(), "UTF-8");
-        // 设置响应头信息
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-        // 内容类型为通用类型，表示二进制数据流
-        response.setContentType("application/octet-stream");
-        // 循环，边读取边输出，可避免大文件时OOM
-        try (InputStream inputStream = new FileInputStream(file); OutputStream os = response.getOutputStream()) {
-            byte[] bytes = new byte[1024];
-            int readLength;
-            while ((readLength = inputStream.read(bytes)) != -1) {
-                os.write(bytes, 0, readLength);
-            }
-        }
+        String filename = URLEncoder.encode(pdf.getNewPath().split("/")[pdf.getNewPath().split("/").length-1], "UTF-8");
+        Resource resource = resourceLoader.getResource("file:" + file.getAbsolutePath());
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
+        headers.add(HttpHeaders.CACHE_CONTROL, "no-cache");
+        headers.add("Content-Type","application/octet-stream");
+        return new ResponseEntity<>(resource, headers, HttpStatus.OK);
     }
 
     @Override
