@@ -4,7 +4,7 @@ package com.cat.coin.coincatmanager.domain.pojo;
 import lombok.Data;
 
 @Data
-public class ErrorCode {
+public class Code {
 
     /**
      * 错误码
@@ -15,7 +15,7 @@ public class ErrorCode {
      */
     private final String msg;
 
-    public ErrorCode(Integer code, String message) {
+    public Code(Integer code, String message) {
         this.code = code;
         this.msg = message;
     }

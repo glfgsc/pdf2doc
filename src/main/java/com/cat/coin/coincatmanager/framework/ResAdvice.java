@@ -13,6 +13,8 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.util.HashMap;
+
 @ControllerAdvice
 public class ResAdvice implements ResponseBodyAdvice<Object> {
 
@@ -40,7 +42,7 @@ public class ResAdvice implements ResponseBodyAdvice<Object> {
             return ajaxResult;
         } else if (body instanceof Resource) {
             return body;
-        } else{
+        }else{
             return AjaxResult.success(body);
         }
     }

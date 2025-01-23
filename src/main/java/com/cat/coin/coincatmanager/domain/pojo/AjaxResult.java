@@ -1,6 +1,6 @@
 package com.cat.coin.coincatmanager.domain.pojo;
 
-import com.cat.coin.coincatmanager.domain.enums.GlobalErrorCodeConstants;
+import com.cat.coin.coincatmanager.domain.enums.GlobalCodeConstants;
 
 import java.util.HashMap;
 
@@ -62,8 +62,8 @@ public class AjaxResult extends HashMap<String, Object> {
      */
     public static AjaxResult success() {
         AjaxResult ajaxResult = new AjaxResult();
-        ajaxResult.put(CODE_TAG, GlobalErrorCodeConstants.SUCCESS.getCode());
-        ajaxResult.put(MSG_TAG,GlobalErrorCodeConstants.SUCCESS.getMsg());
+        ajaxResult.put(CODE_TAG, GlobalCodeConstants.SUCCESS.getCode());
+        ajaxResult.put(MSG_TAG, GlobalCodeConstants.SUCCESS.getMsg());
         return ajaxResult;
     }
 
@@ -74,8 +74,8 @@ public class AjaxResult extends HashMap<String, Object> {
      */
     public static AjaxResult success(Object data) {
         AjaxResult ajaxResult = new AjaxResult();
-        ajaxResult.put(CODE_TAG, GlobalErrorCodeConstants.SUCCESS.getCode());
-        ajaxResult.put(MSG_TAG,GlobalErrorCodeConstants.SUCCESS.getMsg());
+        ajaxResult.put(CODE_TAG, GlobalCodeConstants.SUCCESS.getCode());
+        ajaxResult.put(MSG_TAG, GlobalCodeConstants.SUCCESS.getMsg());
         if(data!=null)
             ajaxResult.put(DATA_TAG,data);
         return ajaxResult;
@@ -88,7 +88,7 @@ public class AjaxResult extends HashMap<String, Object> {
      * @return 警告消息
      */
     public static AjaxResult error(String msg) {
-        return AjaxResult.error(GlobalErrorCodeConstants.INTERNAL_SERVER_ERROR.getCode(), msg);
+        return AjaxResult.error(GlobalCodeConstants.INTERNAL_SERVER_ERROR.getCode(), msg);
     }
 
     /**
