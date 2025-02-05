@@ -12,9 +12,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.springframework.util.StringUtils;
@@ -27,8 +29,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //获取token
-        String token = request.getHeader("token");
-        if (!StringUtils.hasText(token)) {
+        String token = request.getHeader("Authorization");
+        String[] whiteList = {"/user/login","/user/register","/user/sendMail","/wechat/checkSignature","/wechat/qrcode"};
+        if (Arrays.stream(whiteList).anyMatch(e -> e.equals(request.getRequestURI())) || !StringUtils.hasText(token) || !token.startsWith("Bearer")) {
             //token为空的话, 就不管它, 让SpringSecurity中的其他过滤器处理请求
             //请求放行
             filterChain.doFilter(request, response);
@@ -37,7 +40,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         //token不为空时, 解析token
         int userid;
         try {
-            Claims claims = JwtUtils.parseJWT(token);
+            Claims claims = JwtUtils.parseJWT(token.substring(7));
             //解析出userid
             userid = claims.get("userId", Integer.class);
         } catch (Exception e) {

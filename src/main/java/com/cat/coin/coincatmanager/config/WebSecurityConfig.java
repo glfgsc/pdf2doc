@@ -37,7 +37,35 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
+    public class SimpleAuthenticationEntryPoint implements AuthenticationEntryPoint {
+        @Override
+        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
+            //todo your business
+            response.setCharacterEncoding("utf-8");
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String resBody = objectMapper.writeValueAsString(GlobalCodeConstants.UNAUTHORIZED);
+            PrintWriter printWriter = response.getWriter();
+            printWriter.print(resBody);
+            printWriter.flush();
+            printWriter.close();
+        }
+    }
 
+    public class SimpleAccessDeniedHandler implements AccessDeniedHandler {
+        @Override
+        public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+            //todo your business
+            response.setCharacterEncoding("utf-8");
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            ObjectMapper objectMapper = new ObjectMapper();
+            String resBody = objectMapper.writeValueAsString(GlobalCodeConstants.ACCESS_DENIED);
+            PrintWriter printWriter = response.getWriter();
+            printWriter.print(resBody);
+            printWriter.flush();
+            printWriter.close();
+        }
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -46,10 +74,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) //由于我们使用token作为信息传递介质, 所以禁用Session
                 .and()
                 .authorizeRequests() // 进行认证请求的配置
-                .antMatchers("/user/login").anonymous() // 将所有登入和注册的接口放开, 这些都是无需认证就访问的
-                .antMatchers("/user/register").anonymous()
-                .antMatchers("/admin/login").anonymous()
-                .antMatchers("/admin/register").anonymous()
+                .antMatchers("/wechat/**").permitAll()
+                .antMatchers("/user/login").permitAll() // 将所有登入和注册的接口放开, 这些都是无需认证就访问的
+                .antMatchers("/user/register").permitAll()
+                .antMatchers("/user/sendMail").permitAll()
+                .antMatchers("/admin/login").permitAll()
+                .antMatchers("/admin/register").permitAll()
                 .anyRequest().authenticated() //除了上面的那些, 剩下的任何接口请求都需要经过认证
                 .and()
                 .cors() //允许跨域请求
@@ -58,17 +88,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         //UsernamePasswordAuthenticationFilter是SpringSecurity默认配置的表单登录拦截器
         http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // 下面这个是权限拒绝处理器, 这个直接照搬就行了.
-        http.exceptionHandling(it -> it.authenticationEntryPoint(((httpServletRequest, httpServletResponse, e) -> {
-            String msg = "{\"msg\": \"用户未登录\"}";
-            httpServletResponse.setStatus(HttpStatus.FORBIDDEN.value());
-            httpServletResponse.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            httpServletResponse.setCharacterEncoding("UTF-8");
-            PrintWriter writer = httpServletResponse.getWriter();
-            writer.write(msg);
-            writer.flush();
-            writer.close();
-        })));
+        http.exceptionHandling().accessDeniedHandler(new SimpleAccessDeniedHandler()).authenticationEntryPoint(new SimpleAuthenticationEntryPoint());
     }
 
 

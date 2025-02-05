@@ -7,13 +7,24 @@ public class RegisterUserVo implements Serializable {
     private String password;
     private String email;
 
+    private String code;
+
     @Override
     public String toString() {
         return "RegisterUserVo{" +
                 "name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
+                ", code='" + code + '\'' +
                 '}';
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
     }
 
     public String getName() {

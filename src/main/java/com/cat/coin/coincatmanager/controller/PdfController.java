@@ -2,13 +2,10 @@ package com.cat.coin.coincatmanager.controller;
 
 import com.cat.coin.coincatmanager.controller.vo.PdfConvertVo;
 import com.cat.coin.coincatmanager.controller.vo.PdfHistoryPageVo;
-import com.cat.coin.coincatmanager.controller.vo.PdfHistoryVo;
 import com.cat.coin.coincatmanager.domain.pojo.AjaxResult;
 import com.cat.coin.coincatmanager.domain.pojo.PageResult;
 import com.cat.coin.coincatmanager.domain.pojo.Pdf;
 import com.cat.coin.coincatmanager.service.PdfConvertService;
-import com.cat.coin.coincatmanager.utils.HttpContextUtils;
-import com.cat.coin.coincatmanager.utils.SpringContextUtils;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -16,19 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @Validated

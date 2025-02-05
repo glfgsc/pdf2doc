@@ -7,7 +7,6 @@ public class User implements Serializable {
     private String name;
     private String password;
     private String email;
-    private String token;
     private String createTime;
     private String updateTime;
     private int enabled;
@@ -28,7 +27,6 @@ public class User implements Serializable {
                 ", name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", email='" + email + '\'' +
-                ", token='" + token + '\'' +
                 ", createTime='" + createTime + '\'' +
                 ", updateTime='" + updateTime + '\'' +
                 ", enabled=" + enabled +
@@ -68,13 +66,6 @@ public class User implements Serializable {
         this.email = email;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
 
     public String getCreateTime() {
         return createTime;
