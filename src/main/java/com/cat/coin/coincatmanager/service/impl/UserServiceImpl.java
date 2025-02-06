@@ -1,9 +1,12 @@
 package com.cat.coin.coincatmanager.service.impl;
 
+import com.cat.coin.coincatmanager.config.EmailAuthenticationToken;
 import com.cat.coin.coincatmanager.controller.vo.LoginUserVo;
 import com.cat.coin.coincatmanager.controller.vo.RegisterUserVo;
 import com.cat.coin.coincatmanager.controller.vo.TokenVo;
 import com.cat.coin.coincatmanager.domain.enums.GlobalCodeConstants;
+import com.cat.coin.coincatmanager.domain.enums.LoginMethod;
+import com.cat.coin.coincatmanager.domain.pojo.AjaxResult;
 import com.cat.coin.coincatmanager.domain.pojo.Code;
 import com.cat.coin.coincatmanager.domain.pojo.SecurityUser;
 import com.cat.coin.coincatmanager.domain.pojo.User;
@@ -51,28 +54,38 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private PasswordEncoder bcryptPasswordEncoder;
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) {
         User user = userMapper.getUserByName(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("username not found");
-        }
         // 在这里将用户的权限转换为字符串数组
         List<String> list = new ArrayList<>(Arrays.asList(user.getRole()));
         return new SecurityUser(user,list);
     }
 
     @Override
-    public TokenVo login(LoginUserVo loginUserVo, HttpServletRequest request,HttpServletResponse response) {
+    public UserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
+        User user = userMapper.getUserByEmail(email);
+        if (user == null) {
+            // 抛UsernameNotFoundException异常
+            throw  new UsernameNotFoundException("user " + email + " not exist!");
+        }
+        // 在这里将用户的权限转换为字符串数组
+        List<String> list = new ArrayList<>(Arrays.asList(user.getRole()));
+        return new SecurityUser(user,list);
+    }
+    @Override
+    public AjaxResult passwordLogin(LoginUserVo loginUserVo, HttpServletRequest request, HttpServletResponse response) {
+        User user = userMapper.getUserByName(loginUserVo.getName());
+        if(user == null){
+             return AjaxResult.error(GlobalCodeConstants.USER_NOT_EXIST.getCode(),GlobalCodeConstants.USER_NOT_EXIST.getMsg());
+        }
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(loginUserVo.getName(), loginUserVo.getPassword());
         // 使用authenticationManager调用loadUserByUsername获取数据库中的用户信息,
         Authentication authentication = authenticationManager.authenticate(authToken);
         if(authentication == null) {
-            throw new RuntimeException("Login false");
+            return AjaxResult.error(GlobalCodeConstants.PASSWORD_ERROR.getCode(),GlobalCodeConstants.PASSWORD_ERROR.getMsg());
         }
-
         SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
         Integer useId = securityUser.getUser().getId();
-        String usrName = securityUser.getUsername();
 
         List<String> authList = new ArrayList<String>();
         for (GrantedAuthority auth : securityUser.getAuthorities()) {
@@ -83,7 +96,34 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         redisCacheUtils.setCacheObject("login:"+useId,securityUser);
         TokenVo tokenVo = new TokenVo();
         tokenVo.setToken(jwt);
-        return tokenVo;
+        return AjaxResult.success(tokenVo);
+    }
+
+    @Override
+    public AjaxResult emailLogin(LoginUserVo loginUserVo, HttpServletRequest request, HttpServletResponse response) {
+        User user = userMapper.getUserByEmail(loginUserVo.getEmail());
+        if(user == null){
+            return AjaxResult.error(GlobalCodeConstants.USER_NOT_EXIST.getCode(),GlobalCodeConstants.USER_NOT_EXIST.getMsg());
+        }
+        EmailAuthenticationToken authToken = new EmailAuthenticationToken(new ArrayList<>(),loginUserVo.getEmail(), loginUserVo.getCode());
+        // 使用authenticationManager调用loadUserByUsername获取数据库中的用户信息,
+        Authentication authentication = authenticationManager.authenticate(authToken);
+        if(authentication == null) {
+            return AjaxResult.error(GlobalCodeConstants.PASSWORD_ERROR.getCode(),GlobalCodeConstants.PASSWORD_ERROR.getMsg());
+        }
+        SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
+        Integer useId = securityUser.getUser().getId();
+
+        List<String> authList = new ArrayList<String>();
+        for (GrantedAuthority auth : securityUser.getAuthorities()) {
+            authList.add(auth.getAuthority());
+        }
+        String jwt = JwtUtils.createJwt("user login", useId);
+        // 存入Redis
+        redisCacheUtils.setCacheObject("login:"+useId,securityUser);
+        TokenVo tokenVo = new TokenVo();
+        tokenVo.setToken(jwt);
+        return AjaxResult.success(tokenVo);
     }
 
     @Override
@@ -112,6 +152,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setName(registerUserVo.getName());
         user.setEmail(registerUserVo.getEmail());
         // 在这里将用户密码进行加密, 存入数据库 (可不能对密码明文存储)
+
         user.setPassword(bcryptPasswordEncoder.encode(registerUserVo.getPassword()));
         user.setEnabled(1); //经过管理员确认后才可使用 TODO:这里需要修改
         user.setRole("user");
