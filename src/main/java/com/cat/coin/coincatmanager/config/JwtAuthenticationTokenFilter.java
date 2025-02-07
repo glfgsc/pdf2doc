@@ -30,7 +30,11 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //获取token
         String token = request.getHeader("Authorization");
-        String[] whiteList = {"/user/email/login","/user/password/login","/user/register","/user/sendMail","/wechat/checkSignature","/wechat/qrcode"};
+        String[] whiteList = {"/user/email/login",
+                "/user/checkUserName",
+                "/pdf/downloadOldFile",
+                "/pdf/downloadNewFile",
+                "/user/resetPassword","/user/password/login","/user/register","/user/sendLoginMail","/user/sendRegisterMail","/user/sendForgetPasswordMail","/wechat/checkSignature","/wechat/qrcode"};
         if (Arrays.stream(whiteList).anyMatch(e -> e.equals(request.getRequestURI())) || !StringUtils.hasText(token) || !token.startsWith("Bearer")) {
             //token为空的话, 就不管它, 让SpringSecurity中的其他过滤器处理请求
             //请求放行

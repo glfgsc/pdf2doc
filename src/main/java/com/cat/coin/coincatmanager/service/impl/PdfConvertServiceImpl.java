@@ -1,11 +1,16 @@
 package com.cat.coin.coincatmanager.service.impl;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.aspose.pdf.License;
 import com.aspose.words.FontSettings;
 import com.cat.coin.coincatmanager.controller.vo.PdfConvertVo;
 import com.cat.coin.coincatmanager.controller.vo.PdfHistoryPageVo;
 import com.cat.coin.coincatmanager.domain.pojo.PageParam;
 import com.cat.coin.coincatmanager.domain.pojo.Pdf;
+import com.cat.coin.coincatmanager.domain.pojo.SecurityUser;
+import com.cat.coin.coincatmanager.domain.pojo.User;
 import com.cat.coin.coincatmanager.mapper.PdfConvertHistoryMapper;
+import com.cat.coin.coincatmanager.mapper.UserMapper;
 import com.cat.coin.coincatmanager.service.PdfConvertService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.core.io.ResourceLoader;
 
@@ -42,6 +49,9 @@ public class PdfConvertServiceImpl implements PdfConvertService {
 
     @Autowired
     private PdfConvertHistoryMapper pdfConvertHistoryMapper;
+
+    @Autowired
+    private UserMapper userMapper;
 
     @Async
     @Override
@@ -118,6 +128,10 @@ public class PdfConvertServiceImpl implements PdfConvertService {
             pdf.setId(UUID.randomUUID().toString());
             pdf.setName(fileName);
             pdf.setStatus(0);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            JSONObject user = JSONObject.parseObject(JSON.toJSONString(authentication.getPrincipal()));
+            Integer userId = user.getJSONObject("user").getInteger("id");
+            pdf.setCreator(userId);
             pdfConvertHistoryMapper.insert(pdf);
             return pdfConvertHistoryMapper.selectById(pdf.getId());
     }
@@ -167,9 +181,10 @@ public class PdfConvertServiceImpl implements PdfConvertService {
 
     @Override
     public List<Pdf> getHistoryByPage(PdfHistoryPageVo pdfHistoryPageVo) {
-        if(pdfHistoryPageVo.getPageSize() != PageParam.PAGE_SIZE_NONE)
+        if(pdfHistoryPageVo.getPageSize() != PageParam.PAGE_SIZE_NONE){
             PageHelper.startPage(pdfHistoryPageVo.getPageNum(), pdfHistoryPageVo.getPageSize());
-        return pdfConvertHistoryMapper.select(pdfHistoryPageVo);
+        }
+        return pdfConvertHistoryMapper.select(pdfHistoryPageVo.getCreator());
     }
 
     @Override

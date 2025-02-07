@@ -11,7 +11,7 @@ public interface PdfConvertHistoryMapper {
     void insert(Pdf pdf);
     List<Pdf> selectAll();
 
-    List<Pdf> select(PdfHistoryPageVo pdfHistoryPageVo);
+    List<Pdf> select(int creator);
 
     Pdf selectById(String id);
 

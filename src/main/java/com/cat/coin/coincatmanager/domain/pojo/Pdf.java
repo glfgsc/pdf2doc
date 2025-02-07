@@ -8,7 +8,7 @@ public class Pdf implements Serializable {
     private String name;
     private String createTime;
     private String updateTime;
-    private String creator;
+    private int creator;
 
     public String getUpdateTime() {
         return updateTime;
@@ -68,11 +68,11 @@ public class Pdf implements Serializable {
         this.createTime = createTime;
     }
 
-    public String getCreator() {
+    public int getCreator() {
         return creator;
     }
 
-    public void setCreator(String creator) {
+    public void setCreator(int creator) {
         this.creator = creator;
     }
 

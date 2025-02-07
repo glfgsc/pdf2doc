@@ -107,7 +107,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/email/login").permitAll() // 将所有登入和注册的接口放开, 这些都是无需认证就访问的
                 .antMatchers("/user/password/login").permitAll() // 将所有登入和注册的接口放开, 这些都是无需认证就访问的
                 .antMatchers("/user/register").permitAll()
-                .antMatchers("/user/sendMail").permitAll()
+                .antMatchers("/user/resetPassword").permitAll()
+                .antMatchers("/user/sendLoginMail").permitAll()
+                .antMatchers("/user/sendRegisterMail").permitAll()
+                .antMatchers("/user/sendForgetPasswordMail").permitAll()
+                .antMatchers("/pdf/downloadOldFile").permitAll()
+                .antMatchers("/pdf/downloadNewFile").permitAll()
+                .antMatchers("/user/checkUserName").permitAll()
                 .antMatchers("/admin/login").permitAll()
                 .antMatchers("/admin/register").permitAll()
                 .anyRequest().authenticated() //除了上面的那些, 剩下的任何接口请求都需要经过认证

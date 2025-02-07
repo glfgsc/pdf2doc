@@ -29,4 +29,9 @@
     <insert id="registerUser" parameterType="com.cat.coin.coincatmanager.domain.pojo.User">
         insert into user (name,password,email,enabled,role) values(#{name},#{password},#{email},#{enabled},#{role})
     </insert>
+
+    <update id="resetPassword" parameterType="com.cat.coin.coincatmanager.controller.vo.ResetPasswordVo">
+        update user set password = #{password}
+        where email = #{email}
+    </update>
 </mapper>

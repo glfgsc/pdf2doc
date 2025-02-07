@@ -69,13 +69,13 @@ public class EmailAuthenticationProvider implements AuthenticationProvider, Init
         String email = authentication.getPrincipal().toString();
         if (StringUtils.isEmpty(email)) {
             logger.error("email cannot be null");
-            throw new BadCredentialsException("email cannot be null");
+            throw new BadCredentialsException("邮箱不能为空");
         }
         // 获取authentication参数的credentials属性作为短信验证码
         String code = authentication.getCredentials().toString();
         if (StringUtils.isEmpty(code)) {
             logger.error("code cannot be null");
-            throw new BadCredentialsException("code cannot be null");
+            throw new BadCredentialsException("验证码不能为空");
         }
         try {
             // 调用userService服务根据手机号查询用户信息
@@ -86,12 +86,12 @@ public class EmailAuthenticationProvider implements AuthenticationProvider, Init
             String storedCode = (String) redisTemplate.opsForValue().get("loginVerifyCode:"+email);
             if (storedCode==null) {
                 logger.error("code is expired");
-                throw new BadCredentialsException("code is expired");
+                throw new BadCredentialsException("验证码已失效");
             }
             // 用户登录携带的短信验证码与redis中根据手机号查询出来的登录认证短信验证码不一致则抛出验证码错误异常
             if (!code.equals(storedCode)) {
                 logger.error("the code is not correct");
-                throw new BadCredentialsException("the code is not correct");
+                throw new BadCredentialsException("验证码错误");
             }
             // 把完成的用户信息赋值给组成返回认证token中的principal属性值
             Object principalToReturn = user;
@@ -106,8 +106,7 @@ public class EmailAuthenticationProvider implements AuthenticationProvider, Init
             // 用户手机号不存在，如果用户已注册提示用户先去个人信息页面添加手机号码信息，否则提示用户使用手机号注册成为用户后再登录
             logger.error("user " + email + "not found, if you have been register as a user, please goto the page of edit user information to  add you phone number, " +
                     "else you must register as a user use you phone number");
-            throw new BadCredentialsException("user " +email + "not found, if you have been register as a user, please goto the page of edit user information to  add you phone number, " +
-                    "else you must register as a user use you phone number");
+            throw new BadCredentialsException("邮箱尚未注册");
         } catch (NumberFormatException e) {
             logger.error("invalid phoneNo, due it is not a number");
             throw new BadCredentialsException("invalid phoneNo, due do phoneNo is not a number");

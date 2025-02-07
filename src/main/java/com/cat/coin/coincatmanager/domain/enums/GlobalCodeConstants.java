@@ -45,6 +45,7 @@ public interface GlobalCodeConstants {
     Code USER_NOT_EXIST = new Code(1003,"用户不存在");
     Code PASSWORD_ERROR = new Code(1004,"密码错误");
     Code EMAIL_NOT_EXIST = new Code(1005,"邮箱尚未注册");
+    Code EMAIL_CODE_EXPIRE = new Code(1006,"验证码已失效");
 
 }
 

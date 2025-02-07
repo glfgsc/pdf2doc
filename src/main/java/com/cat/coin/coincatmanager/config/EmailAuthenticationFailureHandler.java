@@ -2,6 +2,7 @@ package com.cat.coin.coincatmanager.config;
 
 import com.cat.coin.coincatmanager.domain.enums.GlobalCodeConstants;
 import com.cat.coin.coincatmanager.domain.pojo.AjaxResult;
+import com.cat.coin.coincatmanager.domain.pojo.Code;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -19,7 +20,7 @@ public class EmailAuthenticationFailureHandler implements AuthenticationFailureH
         response.setCharacterEncoding("utf-8");
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         ObjectMapper objectMapper = new ObjectMapper();
-        String resBody = objectMapper.writeValueAsString(GlobalCodeConstants.EMAIL_ERROR_CODE);
+        String resBody = objectMapper.writeValueAsString(new Code(GlobalCodeConstants.EMAIL_ERROR_CODE.getCode(),exception.getMessage()));
         PrintWriter printWriter = response.getWriter();
         printWriter.print(resBody);
         printWriter.flush();
