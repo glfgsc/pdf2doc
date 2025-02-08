@@ -66,13 +66,13 @@ public class PdfController {
 
     @GetMapping("/downloadOldFileUrl")
     public AjaxResult downloadOldFileUrl(String id,String token){
-        return AjaxResult.success("http://www.icoincat.cn/api/pdf/downloadOldFile?id=" + id + "&token=" + token);
+        return AjaxResult.success("https://www.icoincat.cn/api/pdf/downloadOldFile?id=" + id + "&token=" + token);
     }
 
     @GetMapping("/downloadNewFileUrl")
     public AjaxResult downloadNewFileUrl(String id,String token){
 
-        return AjaxResult.success("http://www.icoincat.cn/api/pdf/downloadNewFile?id=" + id + "&token=" + token);
+        return AjaxResult.success("https://www.icoincat.cn/api/pdf/downloadNewFile?id=" + id + "&token=" + token);
     }
 
     @GetMapping("/delete")
