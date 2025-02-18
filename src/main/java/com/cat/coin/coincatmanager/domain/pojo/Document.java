@@ -1,31 +1,52 @@
 package com.cat.coin.coincatmanager.domain.pojo;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
+import com.cat.coin.coincatmanager.domain.enums.FileType;
 
-public class Pdf implements Serializable {
+import java.io.Serializable;
+
+public class Document implements Serializable {
     private String id;
     private String name;
     private String createTime;
     private String updateTime;
     private int creator;
+    private FileType sourceType;
+    private FileType targetType;
 
-    public String getUpdateTime() {
-        return updateTime;
+    public FileType getSourceType() {
+        return sourceType;
     }
 
     @Override
     public String toString() {
-        return "Pdf{" +
+        return "Document{" +
                 "id='" + id + '\'' +
                 ", name='" + name + '\'' +
-                ", createTime=" + createTime +
-                ", updateTime=" + updateTime +
-                ", creator='" + creator + '\'' +
+                ", createTime='" + createTime + '\'' +
+                ", updateTime='" + updateTime + '\'' +
+                ", creator=" + creator +
+                ", sourceType='" + sourceType + '\'' +
+                ", targetType='" + targetType + '\'' +
                 ", newPath='" + newPath + '\'' +
                 ", oldPath='" + oldPath + '\'' +
                 ", status=" + status +
                 '}';
+    }
+
+    public void setSourceType(FileType sourceType) {
+        this.sourceType = sourceType;
+    }
+
+    public FileType getTargetType() {
+        return targetType;
+    }
+
+    public void setTargetType(FileType targetType) {
+        this.targetType = targetType;
+    }
+
+    public String getUpdateTime() {
+        return updateTime;
     }
 
     public void setUpdateTime(String updateTime) {

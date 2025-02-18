@@ -2,11 +2,11 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="com.cat.coin.coincatmanager.mapper.PdfConvertHistoryMapper">
+<mapper namespace="com.cat.coin.coincatmanager.mapper.DocumentConvertHistoryMapper">
     <!--    <resultMap type="com.elephant.elephant_bi.domain.pojo.DataOrigin" id="dataOriginMap">-->
     <!--        <result property="connectionPool" column="connectionPool"  typeHandler="com.elephant.elephant_bi.framework.ObjectJsonHandler"/>-->
     <!--    </resultMap>-->
-    <resultMap id="pdfMap" type="com.cat.coin.coincatmanager.domain.pojo.Pdf">
+    <resultMap id="pdfMap" type="com.cat.coin.coincatmanager.domain.pojo.Document">
         <result column="id"    property="id"/>
         <result column="name"    property="name"/>
         <result column="creator"    property="creator"/>
@@ -14,47 +14,51 @@
         <result column="update_time"    property="updateTime"/>
         <result column="old_path"    property="oldPath"/>
         <result column="new_path"   property="newPath"/>
+        <result column="source_type"   property="sourceType"/>
+        <result column="target_type"   property="targetType"/>
     </resultMap>
 
-    <insert id="insert" parameterType="com.cat.coin.coincatmanager.domain.pojo.Pdf">
-        insert into pdf_convert_history (id,name,old_path,new_path,creator,status)
-        values(#{id},#{name},#{oldPath},#{newPath},#{creator},#{status})
+    <insert id="insert" parameterType="com.cat.coin.coincatmanager.domain.pojo.Document">
+        insert into document_convert_history (id,name,old_path,new_path,creator,status,source_type,target_type)
+        values(#{id},#{name},#{oldPath},#{newPath},#{creator},#{status},#{sourceType},#{targetType})
     </insert>
 
     <select id="selectAll"  resultMap="pdfMap">
         select *
-        from pdf_convert_history
+        from document_convert_history
     </select>
 
     <select id="selectById"  resultMap="pdfMap">
         select *
-        from pdf_convert_history
+        from document_convert_history
         where id = #{id}
     </select>
 
     <select id="selectByOldPath" resultMap="pdfMap">
         select *
-            from pdf_convert_history
+            from document_convert_history
         where old_path = #{oldPath}
     </select>
 
     <delete id="delete" parameterType="string">
-        delete from pdf_convert_history
+        delete from document_convert_history
         where id = #{id}
     </delete>
 
-    <select id="select" parameterType="com.cat.coin.coincatmanager.controller.vo.PdfHistoryPageVo" resultMap="pdfMap">
+    <select id="select" parameterType="com.cat.coin.coincatmanager.controller.vo.DocumentHistoryPageVo" resultMap="pdfMap">
         select *
-            from pdf_convert_history
+            from document_convert_history
         where
         1=1
         <if test="creator != null" > and creator = #{creator} </if>
     </select>
 
-    <update id="updateById" parameterType="com.cat.coin.coincatmanager.domain.pojo.Pdf">
-        update pdf_convert_history
+    <update id="updateById" parameterType="com.cat.coin.coincatmanager.domain.pojo.Document">
+        update document_convert_history
         set id = #{id}
         <if test="creator != null" > ,creator = #{creator} </if>
+        <if test="sourceType != null" > ,source_type = #{sourceType} </if>
+        <if test="targetType != null" > ,target_type = #{targetType} </if>
         <if test="oldPath != null" > ,old_path = #{oldPath} </if>
         <if test="newPath != null" > ,new_path = #{newPath} </if>
         <if test="status != null" > ,status = #{status} </if>

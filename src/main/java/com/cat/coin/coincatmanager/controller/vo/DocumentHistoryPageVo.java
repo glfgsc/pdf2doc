@@ -4,7 +4,7 @@ import com.cat.coin.coincatmanager.domain.pojo.PageParam;
 
 import java.io.Serializable;
 
-public class PdfHistoryPageVo extends PageParam implements Serializable {
+public class DocumentHistoryPageVo extends PageParam implements Serializable {
     private int creator;
 
     public int getCreator() {

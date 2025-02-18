@@ -2,11 +2,11 @@ package com.cat.coin.coincatmanager.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.cat.coin.coincatmanager.controller.vo.PdfConvertVo;
-import com.cat.coin.coincatmanager.controller.vo.PdfHistoryPageVo;
+import com.cat.coin.coincatmanager.controller.vo.DocumentConvertVo;
+import com.cat.coin.coincatmanager.controller.vo.DocumentHistoryPageVo;
 import com.cat.coin.coincatmanager.domain.pojo.*;
 import com.cat.coin.coincatmanager.mapper.UserMapper;
-import com.cat.coin.coincatmanager.service.PdfConvertService;
+import com.cat.coin.coincatmanager.service.DocumentConvertService;
 import com.cat.coin.coincatmanager.utils.RedisCacheUtils;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +24,13 @@ import java.util.List;
 
 @RestController
 @Validated
-@RequestMapping("/pdf")
+@RequestMapping("/document")
 @EnableAsync
-public class PdfController {
+public class DocumentController {
     private static final String UPLOAD_DIR = "uploads/";
 
     @Autowired
-    private PdfConvertService pdfConvertService;
+    private DocumentConvertService documentConvertService;
 
     @Autowired
     private UserMapper userMapper;
@@ -39,44 +39,44 @@ public class PdfController {
     private RedisCacheUtils redisCacheUtils;
 
     @PostMapping("/convert")
-    public Pdf pdfConvert(PdfConvertVo pdfConvertVo) throws Exception {
-        Pdf pdf = pdfConvertService.pdfConvert(pdfConvertVo);
-        pdfConvertService.pdfConvertSchedule(pdfConvertVo,pdf,pdfConvertVo.getFile().getInputStream());
-        return pdf;
+    public Document documentConvert(DocumentConvertVo documentConvertVo) throws Exception {
+        Document document = documentConvertService.documentConvert(documentConvertVo);
+        documentConvertService.documentConvertSchedule(documentConvertVo,document,documentConvertVo.getFile().getInputStream());
+        return document;
     }
     @GetMapping("/history")
-    public PageResult<Pdf> getHistory(PdfHistoryPageVo pdfHistoryPageVo){
+    public PageResult<Document> getHistory(DocumentHistoryPageVo pdfHistoryPageVo){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         JSONObject user = JSONObject.parseObject(JSON.toJSONString(authentication.getPrincipal()));
         Integer userId = user.getJSONObject("user").getInteger("id");
         pdfHistoryPageVo.setCreator(userId);
-        List<Pdf> historyByPage = pdfConvertService.getHistoryByPage(pdfHistoryPageVo);
+        List<Document> historyByPage = documentConvertService.getHistoryByPage(pdfHistoryPageVo);
         return new PageResult<>(historyByPage,new PageInfo(historyByPage).getTotal());
     }
 
     @GetMapping("/downloadOldFile")
     public ResponseEntity<Resource> downloadOldFile(@RequestParam("id") String id,@RequestParam("token") String token, HttpServletResponse response) throws IOException {
-        return pdfConvertService.downloadOldFile(id,response);
+        return documentConvertService.downloadOldFile(id,response);
     }
 
     @GetMapping("/downloadNewFile")
     public ResponseEntity<Resource> downloadNewFile(@RequestParam("id") String id,@RequestParam("token")String token,HttpServletResponse response) throws IOException {
-        return pdfConvertService.downloadNewFile(id,response);
+        return documentConvertService.downloadNewFile(id,response);
     }
 
     @GetMapping("/downloadOldFileUrl")
     public AjaxResult downloadOldFileUrl(String id,String token){
-        return AjaxResult.success("https://www.icoincat.cn/api/pdf/downloadOldFile?id=" + id + "&token=" + token);
+        return AjaxResult.success("https://www.icoincat.cn/api/document/downloadOldFile?id=" + id + "&token=" + token);
     }
 
     @GetMapping("/downloadNewFileUrl")
     public AjaxResult downloadNewFileUrl(String id,String token){
 
-        return AjaxResult.success("https://www.icoincat.cn/api/pdf/downloadNewFile?id=" + id + "&token=" + token);
+        return AjaxResult.success("https://www.icoincat.cn/api/document/downloadNewFile?id=" + id + "&token=" + token);
     }
 
     @GetMapping("/delete")
     public void delete(String id){
-        pdfConvertService.delete(id);
+        documentConvertService.delete(id);
     }
 }

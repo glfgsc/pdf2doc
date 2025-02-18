@@ -2,9 +2,8 @@ package com.cat.coin.coincatmanager.controller.vo;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import com.cat.coin.coincatmanager.domain.pojo.PageParam;
 
-public class PdfHistoryVo   implements Serializable{
+public class DocumentHistoryVo implements Serializable{
     private int id;
     private String name;
     private Timestamp createTime;
