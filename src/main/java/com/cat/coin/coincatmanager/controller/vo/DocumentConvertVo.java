@@ -10,6 +10,7 @@ public class DocumentConvertVo implements Serializable {
     private FileType sourceType;
     private FileType targetType;
 
+
     public FileType getSourceType() {
         return sourceType;
     }

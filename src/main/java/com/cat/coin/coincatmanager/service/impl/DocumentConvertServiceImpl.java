@@ -1,6 +1,7 @@
 package com.cat.coin.coincatmanager.service.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.aspose.cells.Workbook;
 import com.aspose.pdf.*;
 import com.aspose.pdf.devices.JpegDevice;
 import com.aspose.pdf.devices.PngDevice;
@@ -44,8 +45,14 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
     @Value("${file.path}")
     private String filePath;
 
-    @Value("${license.path}")
-    private String licensePath;
+    @Value("${words.license.path}")
+    private String wordsLicensePath;
+
+    @Value("${pdf.license.path}")
+    private String pdfLicensePath;
+
+    @Value("${cells.license.path}")
+    private String cellsLicensePath;
 
     @Autowired
     private DocumentConvertHistoryMapper documentConvertHistoryMapper;
@@ -80,12 +87,12 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
         }
         try{
             //读取配置文件
-            InputStream is = new FileInputStream(new File(licensePath));//license文件的位置
-            License license = new License();
-            license.setLicense(is);
             //写入转换后文件
             String[] splits = fileName.split("\\.");
             if(FileType.PDF == pdfConvertVo.getSourceType()){
+                InputStream is = new FileInputStream(new File(pdfLicensePath));//license文件的位置
+                License license = new License();
+                license.setLicense(is);
                 String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]   + "." + pdfConvertVo.getTargetType().toString().toLowerCase();
                 FileOutputStream os = new FileOutputStream(newUrl);
                 com.aspose.pdf.Document doc = new com.aspose.pdf.Document(oldUrl+File.separator+dateName);//加载源文件数据
@@ -147,6 +154,9 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 is.close();
                 os.close();
             }else if(FileType.DOCX == pdfConvertVo.getSourceType()){
+                InputStream is = new FileInputStream(new File(wordsLicensePath));//license文件的位置
+                com.aspose.words.License license = new com.aspose.words.License();
+                license.setLicense(is);
                 String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]    + "." + pdfConvertVo.getTargetType().toString().toLowerCase();
                 FileOutputStream os = new FileOutputStream(newUrl);
                 com.aspose.words.Document doc = new com.aspose.words.Document(oldUrl+File.separator+dateName);//加载源文件数据
@@ -166,6 +176,26 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 documentConvertHistoryMapper.updateById(document);
                 is.close();
                 os.close();
+            }else if(FileType.XLSX == pdfConvertVo.getSourceType() || FileType.XLS == pdfConvertVo.getSourceType()){
+                InputStream is = new FileInputStream(new File(cellsLicensePath));//license文件的位置
+                com.aspose.cells.License license = new com.aspose.cells.License();
+                license.setLicense(is);
+                Workbook workbook = new Workbook(oldUrl + File.separator + dateName);
+                if(pdfConvertVo.getTargetType() == FileType.PDF){
+                    com.aspose.cells.PdfSaveOptions pdfSaveOptions = new com.aspose.cells.PdfSaveOptions();
+                    pdfSaveOptions.setOnePagePerSheet(true);
+                    String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]    + "." + pdfConvertVo.getTargetType().toString().toLowerCase();
+                    FileOutputStream os = new FileOutputStream(newUrl);
+//                int[] autoDrawSheets = {3};
+//                autoDraw(workbook, autoDrawSheets);
+                    printSheetPage(workbook);
+                    workbook.save(os, pdfSaveOptions);
+                    os.flush();
+                    document.setNewPath(newUrl);
+                    document.setStatus(2);
+                    documentConvertHistoryMapper.updateById(document);
+                }
+
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -176,6 +206,27 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
 
     }
 
+    public static void autoDraw(Workbook wb, int[] page) {
+        if (null != page && page.length > 0) {
+            for (int i = 0; i < page.length; i++) {
+                wb.getWorksheets().get(i).getHorizontalPageBreaks().clear();
+                wb.getWorksheets().get(i).getVerticalPageBreaks().clear();
+            }
+        }
+    }
+
+    private static void printSheetPage(Workbook wb) {
+        for (int i = 1; i < wb.getWorksheets().getCount(); i++) {
+            wb.getWorksheets().get(i).setVisible(true);
+        }
+//        if (null == sheets || sheets.length == 0) {
+//            wb.getWorksheets().get(0).setVisible(true);
+//        } else {
+//            for (int i = 0; i < sheets.length; i++) {
+//                wb.getWorksheets().get(i).setVisible(true);
+//            }
+//        }
+    }
 
 
     @Override
