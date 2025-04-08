@@ -12,9 +12,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Objects;
 
 import org.springframework.util.StringUtils;
@@ -27,8 +29,16 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         //获取token
-        String token = request.getHeader("token");
-        if (!StringUtils.hasText(token)) {
+        String token = "";
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null){
+            for (Cookie cookie:cookies) {
+                if("token".equals(cookie.getName())){
+                    token = cookie.getValue();
+                }
+            }
+        }
+        if (!StringUtils.hasText(token) || "/user/login".equals(request.getRequestURI()) || "/user/register".equals(request.getRequestURI()) || "/email/code".equals(request.getRequestURI())) {
             //token为空的话, 就不管它, 让SpringSecurity中的其他过滤器处理请求
             //请求放行
             filterChain.doFilter(request, response);
@@ -41,7 +51,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             //解析出userid
             userid = claims.get("userId", Integer.class);
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("token非法");
         }
         //使用userid从Redis缓存中获取用户信息

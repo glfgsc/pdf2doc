@@ -3,6 +3,7 @@ package com.cat.coin.coincatmanager.service.impl;
 import com.cat.coin.coincatmanager.controller.vo.LoginUserVo;
 import com.cat.coin.coincatmanager.controller.vo.RegisterUserVo;
 import com.cat.coin.coincatmanager.controller.vo.TokenVo;
+import com.cat.coin.coincatmanager.domain.enums.GlobalCodeConstants;
 import com.cat.coin.coincatmanager.domain.pojo.SecurityUser;
 import com.cat.coin.coincatmanager.domain.pojo.User;
 import com.cat.coin.coincatmanager.mapper.UserMapper;
@@ -65,7 +66,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         SecurityUser securityUser = (SecurityUser) authentication.getPrincipal();
         Integer useId = securityUser.getUser().getId();
-        String usrName = securityUser.getUsername();
 
         List<String> authList = new ArrayList<String>();
         for (GrantedAuthority auth : securityUser.getAuthorities()) {
@@ -96,7 +96,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         // 在这里将用户密码进行加密, 存入数据库 (可不能对密码明文存储)
         user.setPassword(bcryptPasswordEncoder.encode(registerUserVo.getPassword()));
         user.setEnabled(1); //经过管理员确认后才可使用 TODO:这里需要修改
-        user.setToken("a");
         user.setRole("user");
         return userMapper.registerUser(user);
     }
