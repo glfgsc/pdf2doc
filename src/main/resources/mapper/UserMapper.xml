@@ -14,7 +14,6 @@
         <result column="email"    property="email"/>
         <result column="password"   property="password"/>
         <result column="enabled"   property="enabled"/>
-        <result column="token"   property="token"/>
     </resultMap>
 
     <select id="getUserByName" resultType="com.cat.coin.coincatmanager.domain.pojo.User">
@@ -28,6 +27,11 @@
     </select>
 
     <insert id="registerUser" parameterType="com.cat.coin.coincatmanager.domain.pojo.User">
-        insert into user (name,password,email,enabled,token,role) values(#{name},#{password},#{email},#{enabled},#{token},#{role})
+        insert into user (name,password,email,enabled,role) values(#{name},#{password},#{email},#{enabled},#{role})
     </insert>
+
+    <update id="resetPassword" parameterType="com.cat.coin.coincatmanager.controller.vo.ResetPasswordVo">
+        update user set password = #{password}
+        where email = #{email}
+    </update>
 </mapper>
