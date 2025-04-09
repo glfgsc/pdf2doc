@@ -50,6 +50,7 @@
             from document_convert_history
         where
         1=1
+        and #{sources} like concat('%',source_type,'%')
         <if test="creator != null" > and creator = #{creator} </if>
     </select>
 

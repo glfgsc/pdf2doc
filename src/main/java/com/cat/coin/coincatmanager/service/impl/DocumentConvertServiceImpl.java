@@ -60,7 +60,7 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
     @Autowired
     private UserMapper userMapper;
 
-    @Async
+    @Async("async-executor-guava")
     @Override
     public void documentConvertSchedule(DocumentConvertVo pdfConvertVo, Document document, InputStream inputStream) throws Exception {
         String fileName = pdfConvertVo.getFile().getOriginalFilename();
@@ -285,10 +285,10 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
 
     @Override
     public List<Document> getHistoryByPage(DocumentHistoryPageVo pdfHistoryPageVo) {
-        if(pdfHistoryPageVo.getPageSize() != PageParam.PAGE_SIZE_NONE){
+        if(pdfHistoryPageVo.getPageSize() != PageParam.PAGE_SIZE_NONE) {
             PageHelper.startPage(pdfHistoryPageVo.getPageNum(), pdfHistoryPageVo.getPageSize());
         }
-        return documentConvertHistoryMapper.select(pdfHistoryPageVo.getCreator());
+        return documentConvertHistoryMapper.select(pdfHistoryPageVo);
     }
 
     @Override
