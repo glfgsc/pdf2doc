@@ -60,7 +60,7 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
     @Autowired
     private UserMapper userMapper;
 
-    @Async
+    @Async("async-executor-guava")
     @Override
     public void documentConvertSchedule(DocumentConvertVo pdfConvertVo, Document document, InputStream inputStream) throws Exception {
         String fileName = pdfConvertVo.getFile().getOriginalFilename();
@@ -153,9 +153,9 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 doc.close();
                 is.close();
                 os.close();
-            }else if(FileType.DOCX == pdfConvertVo.getSourceType()){
+            }else if(FileType.DOCX == pdfConvertVo.getSourceType() || FileType.DOC == pdfConvertVo.getSourceType()){
                 InputStream is = new FileInputStream(new File(wordsLicensePath));//license文件的位置
-                com.aspose.words.License license = new com.aspose.words.License();
+                License license = new License();
                 license.setLicense(is);
                 String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]    + "." + pdfConvertVo.getTargetType().toString().toLowerCase();
                 FileOutputStream os = new FileOutputStream(newUrl);
@@ -166,7 +166,11 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                     com.aspose.words.HtmlSaveOptions saveOptions = new com.aspose.words.HtmlSaveOptions();
                     saveOptions.setCssStyleSheetType(CssStyleSheetType.EXTERNAL);
                     saveOptions.setExportFontResources(true);
-                    saveOptions.setResourceFolder(this.filePath +  File.separator  + "\\resources");
+                    saveOptions.setResourceFolder(this.filePath +  File.separator  + "resources");
+                    doc.save(newUrl,saveOptions);
+                }else if(pdfConvertVo.getTargetType() == FileType.SVG){
+                    com.aspose.words.SvgSaveOptions saveOptions = new com.aspose.words.SvgSaveOptions();
+                    saveOptions.setResourcesFolder(this.filePath +  File.separator  + "resources");
                     doc.save(newUrl,saveOptions);
                 }else{
                     doc.save(os, DocumentUtils.getAsposeWordFormatType(pdfConvertVo.getTargetType()));//设置转换文件类型并转换
@@ -178,7 +182,7 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 os.close();
             }else if(FileType.XLSX == pdfConvertVo.getSourceType() || FileType.XLS == pdfConvertVo.getSourceType()){
                 InputStream is = new FileInputStream(new File(cellsLicensePath));//license文件的位置
-                com.aspose.cells.License license = new com.aspose.cells.License();
+                License license = new License();
                 license.setLicense(is);
                 Workbook workbook = new Workbook(oldUrl + File.separator + dateName);
                 if(pdfConvertVo.getTargetType() == FileType.PDF){
@@ -186,8 +190,6 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                     pdfSaveOptions.setOnePagePerSheet(true);
                     String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]    + "." + pdfConvertVo.getTargetType().toString().toLowerCase();
                     FileOutputStream os = new FileOutputStream(newUrl);
-//                int[] autoDrawSheets = {3};
-//                autoDraw(workbook, autoDrawSheets);
                     printSheetPage(workbook);
                     workbook.save(os, pdfSaveOptions);
                     os.flush();
@@ -195,7 +197,6 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                     document.setStatus(2);
                     documentConvertHistoryMapper.updateById(document);
                 }
-
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -219,13 +220,6 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
         for (int i = 1; i < wb.getWorksheets().getCount(); i++) {
             wb.getWorksheets().get(i).setVisible(true);
         }
-//        if (null == sheets || sheets.length == 0) {
-//            wb.getWorksheets().get(0).setVisible(true);
-//        } else {
-//            for (int i = 0; i < sheets.length; i++) {
-//                wb.getWorksheets().get(i).setVisible(true);
-//            }
-//        }
     }
 
 
@@ -291,10 +285,10 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
 
     @Override
     public List<Document> getHistoryByPage(DocumentHistoryPageVo pdfHistoryPageVo) {
-        if(pdfHistoryPageVo.getPageSize() != PageParam.PAGE_SIZE_NONE){
+        if(pdfHistoryPageVo.getPageSize() != PageParam.PAGE_SIZE_NONE) {
             PageHelper.startPage(pdfHistoryPageVo.getPageNum(), pdfHistoryPageVo.getPageSize());
         }
-        return documentConvertHistoryMapper.select(pdfHistoryPageVo.getCreator());
+        return documentConvertHistoryMapper.select(pdfHistoryPageVo);
     }
 
     @Override
