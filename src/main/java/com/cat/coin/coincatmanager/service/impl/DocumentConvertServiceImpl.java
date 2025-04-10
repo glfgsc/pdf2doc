@@ -3,9 +3,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.aspose.cells.Workbook;
 import com.aspose.pdf.*;
-import com.aspose.pdf.devices.JpegDevice;
-import com.aspose.pdf.devices.PngDevice;
-import com.aspose.pdf.devices.Resolution;
+import com.aspose.pdf.devices.*;
+import com.aspose.words.CompressionLevel;
 import com.aspose.words.CssStyleSheetType;
 import com.aspose.words.FontSettings;
 import com.cat.coin.coincatmanager.controller.vo.DocumentConvertVo;
@@ -31,6 +30,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import java.io.*;
@@ -93,7 +93,7 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 InputStream is = new FileInputStream(new File(pdfLicensePath));//license文件的位置
                 License license = new License();
                 license.setLicense(is);
-                String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]   + "." + pdfConvertVo.getTargetType().toString().toLowerCase();
+                String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]   + "." + (pdfConvertVo.getTargetType() == FileType.TIFF ? "tiff" : pdfConvertVo.getTargetType().toString().toLowerCase());
                 FileOutputStream os = new FileOutputStream(newUrl);
                 com.aspose.pdf.Document doc = new com.aspose.pdf.Document(oldUrl+File.separator+dateName);//加载源文件数据
                 FontSettings font = new FontSettings();
@@ -129,20 +129,36 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                     doc.save(newUrl,excelSave);
                 }else if(pdfConvertVo.getTargetType() == FileType.JPEG){
                     JpegDevice jpegDevice = new JpegDevice(resolution);
-                    for (int pageCount = 1; pageCount <= doc.getPages().size(); pageCount++) {
-                        java.io.OutputStream imageStream = new java.io.FileOutputStream(
-                                newUrl);
-                        jpegDevice.process(doc.getPages().get_Item(pageCount), imageStream);
-                        imageStream.close();
-                    }
+                    convertPDFtoImages(jpegDevice,newUrl,doc);
                 }else if(pdfConvertVo.getTargetType() == FileType.PNG){
                     PngDevice pngDevice = new PngDevice(resolution);
-                    for (int pageCount = 1; pageCount <= doc.getPages().size(); pageCount++) {
-                        java.io.OutputStream imageStream = new java.io.FileOutputStream(
-                                newUrl);
-                        pngDevice.process(doc.getPages().get_Item(pageCount), imageStream);
-                        imageStream.close();
-                    }
+                    convertPDFtoImages(pngDevice,newUrl,doc);
+                }else if(pdfConvertVo.getTargetType() == FileType.TIFF){
+                    TiffSettings tiffSettings = new TiffSettings();
+                    tiffSettings.setCompression(CompressionType.None);
+                    tiffSettings.setDepth(ColorDepth.Default);
+                    tiffSettings.setShape(ShapeType.Landscape);
+                    TiffDevice tiffDevice = new TiffDevice(resolution, tiffSettings);
+                    tiffDevice.process(doc, 1, 1, new java.io.FileOutputStream(
+                            newUrl));
+                }else if(pdfConvertVo.getTargetType() == FileType.BMP){
+                    BmpDevice bmpDevice = new BmpDevice(resolution);
+                    convertPDFtoImages(bmpDevice,newUrl,doc);
+                }else if(pdfConvertVo.getTargetType() == FileType.EMF){
+                    EmfDevice emfDevice = new EmfDevice(resolution);
+                    convertPDFtoImages(emfDevice,newUrl,doc);
+                }else if(pdfConvertVo.getTargetType() == FileType.GIF){
+                    GifDevice gifDevice = new GifDevice(resolution);
+                    convertPDFtoImages(gifDevice,newUrl,doc);
+                }else if(pdfConvertVo.getTargetType() == FileType.EPUB){
+                    EpubSaveOptions options = new EpubSaveOptions();
+                    options.setContentRecognitionMode(EpubSaveOptions.RecognitionMode.Flow);
+                    doc.save(newUrl, options);
+                    doc.close();
+                }else if(pdfConvertVo.getTargetType() == FileType.XPS){
+                    XpsSaveOptions saveOptions = new XpsSaveOptions();
+                    doc.save(newUrl, saveOptions);
+                    doc.close();
                 }else{
                     doc.save(os, DocumentUtils.getAsposePdfFormatType(pdfConvertVo.getTargetType()));//设置转换文件类型并转换
                 }
@@ -181,9 +197,10 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 is.close();
                 os.close();
             }else if(FileType.XLSX == pdfConvertVo.getSourceType() || FileType.XLS == pdfConvertVo.getSourceType()){
-                InputStream is = new FileInputStream(new File(cellsLicensePath));//license文件的位置
-                License license = new License();
-                license.setLicense(is);
+//                InputStream is = new FileInputStream(new File(cellsLicensePath));//license文件的位置
+//                License license = new License();
+//                license.setLicense(is);
+                DocumentUtils.authorizeLicense();
                 Workbook workbook = new Workbook(oldUrl + File.separator + dateName);
                 if(pdfConvertVo.getTargetType() == FileType.PDF){
                     com.aspose.cells.PdfSaveOptions pdfSaveOptions = new com.aspose.cells.PdfSaveOptions();
@@ -207,12 +224,14 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
 
     }
 
-    public static void autoDraw(Workbook wb, int[] page) {
-        if (null != page && page.length > 0) {
-            for (int i = 0; i < page.length; i++) {
-                wb.getWorksheets().get(i).getHorizontalPageBreaks().clear();
-                wb.getWorksheets().get(i).getVerticalPageBreaks().clear();
-            }
+    public static void convertPDFtoImages(ImageDevice imageDevice,
+                                          String newUrl,
+                                          com.aspose.pdf.Document document) throws IOException {
+        for (int pageCount = 1; pageCount <= document.getPages().size(); pageCount++) {
+            java.io.OutputStream imageStream = new java.io.FileOutputStream(
+                    newUrl);
+            imageDevice.process(document.getPages().get_Item(pageCount), imageStream);
+            imageStream.close();
         }
     }
 
@@ -276,10 +295,15 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
     @Override
     public void delete(String id) {
         Document pdf = documentConvertHistoryMapper.selectById(id);
-        File oldFile = new File(pdf.getOldPath());
-        File newFile = new File(pdf.getNewPath());
-        oldFile.delete();
-        newFile.delete();
+        if(pdf.getOldPath() != null){
+            File oldFile = new File(pdf.getOldPath());
+            oldFile.delete();
+        }
+        if(pdf.getNewPath() != null){
+            File newFile = new File(pdf.getNewPath());
+            newFile.delete();
+        }
+
         documentConvertHistoryMapper.delete(id);
     }
 

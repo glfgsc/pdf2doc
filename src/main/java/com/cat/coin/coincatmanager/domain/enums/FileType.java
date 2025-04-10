@@ -12,5 +12,13 @@ public enum FileType {
     HTML,
     PNG,
     JPEG,
-    TXT
+    TXT,
+    TIFF,
+    BMP,
+    GIF,
+    EMF,
+    EPUB,
+    XPS,
+    MHTML,
+    MD
 }
