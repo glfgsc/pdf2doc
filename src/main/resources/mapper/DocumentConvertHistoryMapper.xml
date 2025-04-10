@@ -51,6 +51,9 @@
         where
         1=1
         and #{sources} like concat('%',source_type,'%')
+        <if test="status != null">and status = #{status}</if>
+        <if test="name != null and '' != name">and name like concat('%',#{name},'%')</if>
+        <if test="targetType != null and '' != targetType">and target_type = #{targetType}</if>
         <if test="creator != null" > and creator = #{creator} </if>
     </select>
 
