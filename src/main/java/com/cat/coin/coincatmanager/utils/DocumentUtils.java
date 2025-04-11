@@ -1,15 +1,9 @@
 package com.cat.coin.coincatmanager.utils;
 
-import com.aspose.cells.License;
 import com.aspose.pdf.SaveFormat;
 import com.cat.coin.coincatmanager.domain.enums.FileType;
-import org.springframework.beans.factory.annotation.Value;
-
-import java.io.InputStream;
 
 public class DocumentUtils {
-    @Value("${cells.license.path}")
-    private static String cellsLicensePath;
     public static int getAsposePdfFormatType(FileType fileType){
         if(fileType == FileType.DOCX){
             return SaveFormat.DocX;
@@ -23,6 +17,8 @@ public class DocumentUtils {
             return SaveFormat.Excel;
         }else if(fileType == FileType.HTML){
             return SaveFormat.Html;
+        }else if(fileType == FileType.PDF){
+            return SaveFormat.Pdf;
         }
         return -1;
     }
@@ -38,35 +34,26 @@ public class DocumentUtils {
             return com.aspose.words.SaveFormat.SVG;
         }else if(fileType == FileType.HTML){
             return com.aspose.words.SaveFormat.HTML;
-        }else if(fileType == FileType.EPUB){
-            return com.aspose.words.SaveFormat.EPUB;
-        }else if(fileType == FileType.MHTML){
-            return com.aspose.words.SaveFormat.MHTML;
-        }else if(fileType == FileType.BMP){
-            return com.aspose.words.SaveFormat.BMP;
-        }else if(fileType == FileType.EMF){
-            return com.aspose.words.SaveFormat.EMF;
-        }else if(fileType == FileType.GIF){
-            return com.aspose.words.SaveFormat.GIF;
-        }else if(fileType == FileType.TIFF){
-            return com.aspose.words.SaveFormat.TIFF;
-        }else if(fileType == FileType.TXT){
-            return com.aspose.words.SaveFormat.TEXT;
+        }else if(fileType == FileType.DOC){
+            return com.aspose.words.SaveFormat.DOC;
+        }else if(fileType == FileType.DOCX){
+            return com.aspose.words.SaveFormat.DOCX;
         }
         return -1;
     }
 
-    public static boolean authorizeLicense() {
-        boolean result = false;
-        try {
-            InputStream is = com.aspose.cells.License.class.getResourceAsStream(cellsLicensePath);
-            License asposeLicense = new License();
-            asposeLicense.setLicense(is);
-            is.close();
-            result = true;
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static int getAsposeExcelFormatType(FileType fileType){
+        if(fileType == FileType.SVG){
+            return com.aspose.cells.SaveFormat.SVG;
+        }else if(fileType == FileType.CSV){
+            return com.aspose.cells.SaveFormat.CSV;
+        }else if(fileType == FileType.XLSX){
+            return com.aspose.cells.SaveFormat.XLSX;
+        }else if(fileType == FileType.XLS){
+            return com.aspose.cells.SaveFormat.EXCEL_97_TO_2003;
+        }else if(fileType == FileType.XPS){
+            return com.aspose.cells.SaveFormat.XPS;
         }
-        return result;
+        return -1;
     }
 }

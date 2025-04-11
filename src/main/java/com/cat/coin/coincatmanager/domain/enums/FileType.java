@@ -20,5 +20,6 @@ public enum FileType {
     EPUB,
     XPS,
     MHTML,
-    MD
+    MD,
+    CSV
 }

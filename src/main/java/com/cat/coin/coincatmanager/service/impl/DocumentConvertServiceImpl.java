@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.aspose.cells.Workbook;
 import com.aspose.pdf.*;
 import com.aspose.pdf.devices.*;
-import com.aspose.words.CompressionLevel;
 import com.aspose.words.CssStyleSheetType;
 import com.aspose.words.FontSettings;
 import com.cat.coin.coincatmanager.controller.vo.DocumentConvertVo;
@@ -30,7 +29,6 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletResponse;
 import java.net.URLEncoder;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.UUID;
 import java.io.*;
@@ -93,7 +91,7 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 InputStream is = new FileInputStream(new File(pdfLicensePath));//license文件的位置
                 License license = new License();
                 license.setLicense(is);
-                String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]   + "." + (pdfConvertVo.getTargetType() == FileType.TIFF ? "tiff" : pdfConvertVo.getTargetType().toString().toLowerCase());
+                String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]   + "." + (pdfConvertVo.getTargetType() == FileType.TIFF ? "tif" : pdfConvertVo.getTargetType().toString().toLowerCase());
                 FileOutputStream os = new FileOutputStream(newUrl);
                 com.aspose.pdf.Document doc = new com.aspose.pdf.Document(oldUrl+File.separator+dateName);//加载源文件数据
                 FontSettings font = new FontSettings();
@@ -173,7 +171,7 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 InputStream is = new FileInputStream(new File(wordsLicensePath));//license文件的位置
                 License license = new License();
                 license.setLicense(is);
-                String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]    + "." + pdfConvertVo.getTargetType().toString().toLowerCase();
+                String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]    + "." + (pdfConvertVo.getTargetType() == FileType.TIFF ? "tif" : pdfConvertVo.getTargetType().toString().toLowerCase());
                 FileOutputStream os = new FileOutputStream(newUrl);
                 com.aspose.words.Document doc = new com.aspose.words.Document(oldUrl+File.separator+dateName);//加载源文件数据
                 FontSettings font = new FontSettings();
@@ -197,23 +195,25 @@ public class DocumentConvertServiceImpl implements DocumentConvertService {
                 is.close();
                 os.close();
             }else if(FileType.XLSX == pdfConvertVo.getSourceType() || FileType.XLS == pdfConvertVo.getSourceType()){
-//                InputStream is = new FileInputStream(new File(cellsLicensePath));//license文件的位置
-//                License license = new License();
-//                license.setLicense(is);
-                DocumentUtils.authorizeLicense();
+                InputStream is = new FileInputStream(new File(cellsLicensePath));//license文件的位置
+                License license = new License();
+                license.setLicense(is);
                 Workbook workbook = new Workbook(oldUrl + File.separator + dateName);
+                String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]    + "." + (pdfConvertVo.getTargetType() == FileType.TIFF ? "tif" : pdfConvertVo.getTargetType().toString().toLowerCase());
+                FileOutputStream os = new FileOutputStream(newUrl);
                 if(pdfConvertVo.getTargetType() == FileType.PDF){
                     com.aspose.cells.PdfSaveOptions pdfSaveOptions = new com.aspose.cells.PdfSaveOptions();
                     pdfSaveOptions.setOnePagePerSheet(true);
-                    String newUrl = this.filePath +  File.separator + "converts" + File.separator + UUID.randomUUID() + "-" + splits[0]    + "." + pdfConvertVo.getTargetType().toString().toLowerCase();
-                    FileOutputStream os = new FileOutputStream(newUrl);
                     printSheetPage(workbook);
                     workbook.save(os, pdfSaveOptions);
-                    os.flush();
-                    document.setNewPath(newUrl);
-                    document.setStatus(2);
-                    documentConvertHistoryMapper.updateById(document);
+                }else{
+                    workbook.save(os,DocumentUtils.getAsposeExcelFormatType(pdfConvertVo.getTargetType()));
                 }
+                document.setNewPath(newUrl);
+                document.setStatus(2);
+                documentConvertHistoryMapper.updateById(document);
+                is.close();
+                os.close();
             }
         }catch(Exception e){
             e.printStackTrace();
