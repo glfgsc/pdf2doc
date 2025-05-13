@@ -7,4 +7,6 @@ import java.io.IOException;
 
 public interface OcrService {
     public String extractText(MultipartFile file) throws IOException;
+
+    public String upload(MultipartFile file) throws IOException;
 }

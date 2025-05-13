@@ -116,6 +116,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/user/checkUserName").permitAll()
                 .antMatchers("/admin/login").permitAll()
                 .antMatchers("/admin/register").permitAll()
+                .antMatchers("/files/upload/**").permitAll()
                 .anyRequest().authenticated() //除了上面的那些, 剩下的任何接口请求都需要经过认证
                 .and()
                 .cors() //允许跨域请求

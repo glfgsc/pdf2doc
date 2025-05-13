@@ -22,6 +22,11 @@ public class OcrController {
     @Autowired
     private OcrService ocrService;
 
+    @PostMapping("/upload")
+    public AjaxResult upload(@RequestParam("file") MultipartFile file) throws IOException {
+        return AjaxResult.success((ocrService.upload(file)));
+    }
+
     @PostMapping("/text")
     public AjaxResult imageToText(@RequestParam("file") MultipartFile file) throws Exception {
         return AjaxResult.success(ocrService.extractText(file));
